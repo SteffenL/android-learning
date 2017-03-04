@@ -1,8 +1,15 @@
 <resources>
     <string name="app_name">PracticeApp</string>
-    <string name="question_text">Sushi is delicious.</string>
     <string name="true_button">True</string>
     <string name="false_button">False</string>
     <string name="correct_toast">Correct!</string>
     <string name="incorrect_toast">Incorrect!</string>
+    <string name="next_button">Next</string>
+    <string name="question_sushi">Sushi is delicious.</string>
+    <string name="question_tea">Premium Japanese green tea must be expensive.</string>
+    <string name="question_mouth">A dirty mouth can be washed with soap.</string>
+    <string name="question_piracy_bad">Piracy is bad.</string>
+    <string name="question_piracy_good">Piracy is good.</string>
+    <string name="question_true">Everything is true.</string>
+    <string name="previous_button">Previous</string>
 </resources>
