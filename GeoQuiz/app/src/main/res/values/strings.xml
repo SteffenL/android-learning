@@ -2,8 +2,6 @@
     <string name="app_name">PracticeApp</string>
     <string name="true_button">True</string>
     <string name="false_button">False</string>
-    <string name="correct_toast">Correct!</string>
-    <string name="incorrect_toast">Incorrect!</string>
     <string name="next_button">Next</string>
     <string name="question_sushi">Sushi is delicious.</string>
     <string name="question_tea">Premium Japanese green tea must be expensive.</string>
@@ -12,4 +10,7 @@
     <string name="question_piracy_good">Piracy is good.</string>
     <string name="question_true">Everything is true.</string>
     <string name="previous_button">Previous</string>
+    <string name="result_all_correct">All answers are correct!</string>
+    <string name="result_partial_correct">{0} of {1} ({2,number,percent}) of the answers are correct!</string>
+    <string name="restart_button">Restart</string>
 </resources>
