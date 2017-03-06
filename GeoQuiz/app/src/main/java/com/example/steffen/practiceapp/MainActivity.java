@@ -16,6 +16,8 @@ public class MainActivity extends AppCompatActivity {
     private static final String KEY_INDEX = "index";
     private static final String KEY_ANSWERS_CORRECT = "answers_correct";
     private static final String KEY_ANSWERS_RECEIVED_STATES = "answers_received_states";
+    private static final String KEY_ANSWERS_SHOWN = "answers_shown";
+    private static final int REQUEST_CODE_CHEAT = 0;
 
     private View mInQuizLayout;
     private Button mTrueButton;
@@ -41,9 +43,10 @@ public class MainActivity extends AppCompatActivity {
     private int mCurrentIndex = 0;
     private boolean[] mAnswersReceivedStates = new boolean[mQuestionBank.length];
     private boolean[] mAnswersCorrect = new boolean[mQuestionBank.length];
-    private boolean[] mAnswersCheated = new boolean[mQuestionBank.length];
+    private boolean[] mAnswersShown = new boolean[mQuestionBank.length];
     private int mCorrectAnswersCount = 0;
     private int mTotalAnswered = 0;
+    private boolean mIsCheater = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
         mCheatButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                confirmCheat();
+                confirmShowAnswer();
             }
         });
 
@@ -121,11 +124,12 @@ public class MainActivity extends AppCompatActivity {
             mCurrentIndex = savedInstanceState.getInt(KEY_INDEX);
             mAnswersReceivedStates = savedInstanceState.getBooleanArray(KEY_ANSWERS_RECEIVED_STATES);
             mAnswersCorrect = savedInstanceState.getBooleanArray(KEY_ANSWERS_CORRECT);
+            mAnswersShown = savedInstanceState.getBooleanArray(KEY_ANSWERS_SHOWN);
+
             mCorrectAnswersCount = numberOfCorrectAnswers(mAnswersReceivedStates, mAnswersCorrect);
             mTotalAnswered = numberOfAnswers(mAnswersReceivedStates);
+            mIsCheater = anyAnswersShown(mAnswersShown);
         }
-
-        updateQuizUi();
     }
 
     @Override
@@ -138,6 +142,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         Log.d(TAG, "onResume() called");
+
+        updateQuizUi();
     }
 
     @Override
@@ -165,6 +171,36 @@ public class MainActivity extends AppCompatActivity {
         outState.putInt(KEY_INDEX, mCurrentIndex);
         outState.putBooleanArray(KEY_ANSWERS_RECEIVED_STATES, mAnswersReceivedStates);
         outState.putBooleanArray(KEY_ANSWERS_CORRECT, mAnswersCorrect);
+        outState.putBooleanArray(KEY_ANSWERS_SHOWN, mAnswersShown);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        Log.d(TAG, "onActivityResult(int, int, Intent) called");
+        if (resultCode != RESULT_OK) {
+            return;
+        }
+
+        switch (requestCode) {
+            case REQUEST_CODE_CHEAT:
+                handleActivityResultForCheat(data);
+                break;
+
+            default:
+                break;
+        }
+    }
+
+    private void handleActivityResultForCheat(Intent data) {
+        if (data == null) {
+            return;
+        }
+
+        boolean answerShown = CheatActivity.wasAnswerShown(data);
+        if (answerShown) {
+            mAnswersShown[mCurrentIndex] = true;
+            mIsCheater = true;
+        }
     }
 
     private void updateQuizUi() {
@@ -183,10 +219,12 @@ public class MainActivity extends AppCompatActivity {
 
             String message;
             if (correctAnswers == totalQuestions) {
-                message = getString(R.string.result_all_correct);
+                int resId = mIsCheater ? R.string.result_all_correct_with_cheats : R.string.result_all_correct;
+                message = getString(resId);
             } else {
                 double correctRatio = (double) correctAnswers / (double) totalQuestions;
-                message = MessageFormat.format(getString(R.string.result_partial_correct), correctAnswers, totalQuestions, correctRatio);
+                int resId = mIsCheater ? R.string.result_partial_correct_with_cheats : R.string.result_partial_correct;
+                message = MessageFormat.format(getString(resId), correctAnswers, totalQuestions, correctRatio);
             }
 
             mVerdictTextView.setText(message);
@@ -235,6 +273,18 @@ public class MainActivity extends AppCompatActivity {
         return result;
     }
 
+    private boolean anyAnswersShown(boolean[] answersShown) {
+        boolean result = false;
+        for (int i = 0; i < answersShown.length; ++i) {
+            if (answersShown[i]) {
+                result = true;
+                break;
+            }
+        }
+
+        return result;
+    }
+
     private void nextQuestion() {
         mCurrentIndex = (mCurrentIndex + 1) % mQuestionBank.length;
         updateQuizUi();
@@ -250,19 +300,21 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 0; i < mQuestionBank.length; ++i) {
             mAnswersReceivedStates[i] = false;
             mAnswersCorrect[i] = false;
+            mAnswersShown[i] = false;
         }
 
         mTotalAnswered = 0;
         mCorrectAnswersCount = 0;
+        mIsCheater = false;
 
         updateQuizUi();
     }
 
-    private void confirmCheat() {
+    private void confirmShowAnswer() {
         boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
-        boolean hasCheated = mAnswersCheated[mCurrentIndex];
-        
-        Intent intent = CheatActivity.newIntent(this, answerIsTrue, hasCheated);
-        startActivity(intent);
+        boolean answerShown = mAnswersShown[mCurrentIndex];
+
+        Intent intent = CheatActivity.newIntent(this, answerIsTrue, answerShown);
+        startActivityForResult(intent, REQUEST_CODE_CHEAT);
     }
 }

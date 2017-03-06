@@ -10,11 +10,12 @@ import android.widget.Button;
 import android.widget.TextView;
 
 public class CheatActivity extends AppCompatActivity {
+    private static final String KEY_SHOW_ANSWER = "show_answer";
     private static final String EXTRA_ANSWER_IS_TRUE = "com.example.steffen.practiceapp.answer_is_true";
-    private static final String EXTRA_ALREADY_CHEATED = "com.example.steffen.practiceapp.already_cheated";
+    private static final String EXTRA_ANSWER_SHOWN = "com.example.steffen.practiceapp.answer_shown";
 
     private boolean mAnswerIsTrue;
-    private boolean mHasCheated;
+    private boolean mShowAnswer;
 
     private TextView mDiscourageCheatTextView;
     private Button mShowAnswerButton;
@@ -37,31 +38,55 @@ public class CheatActivity extends AppCompatActivity {
         });
 
         mAnswerIsTrue = getIntent().getBooleanExtra(EXTRA_ANSWER_IS_TRUE, false);
-        mHasCheated = getIntent().getBooleanExtra(EXTRA_ALREADY_CHEATED, false);
+        mShowAnswer = getIntent().getBooleanExtra(EXTRA_ANSWER_SHOWN, false);
+
+        if (savedInstanceState != null) {
+            mShowAnswer = savedInstanceState.getBoolean(KEY_SHOW_ANSWER, mShowAnswer);
+            if (mShowAnswer) {
+                setAnswerShownResult(true);
+            }
+        }
 
         updateUi();
     }
 
-    public static Intent newIntent(Context packageContext, boolean answerIsTrue, boolean alreadyCheated) {
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(KEY_SHOW_ANSWER, mShowAnswer);
+    }
+
+    public static Intent newIntent(Context packageContext, boolean answerIsTrue, boolean answerShown) {
         Intent intent = new Intent(packageContext, CheatActivity.class);
         intent.putExtra(EXTRA_ANSWER_IS_TRUE, answerIsTrue);
-        intent.putExtra(EXTRA_ALREADY_CHEATED, alreadyCheated);
+        intent.putExtra(EXTRA_ANSWER_SHOWN, answerShown);
         return intent;
     }
 
-    private void updateUi() {
-        mDiscourageCheatTextView.setVisibility(mHasCheated ? View.GONE : View.VISIBLE);
-        mShowAnswerButton.setVisibility(mHasCheated ? View.GONE : View.VISIBLE);
-        mAnswerTextView.setVisibility(mHasCheated ? View.VISIBLE : View.GONE);
+    public static boolean wasAnswerShown(Intent result) {
+        return result.getBooleanExtra(EXTRA_ANSWER_SHOWN, false);
+    }
 
-        if (mHasCheated) {
+    private void setAnswerShownResult(boolean isAnswerShown) {
+        Intent data = new Intent();
+        data.putExtra(EXTRA_ANSWER_SHOWN, isAnswerShown);
+        setResult(RESULT_OK, data);
+    }
+
+    private void updateUi() {
+        mDiscourageCheatTextView.setVisibility(mShowAnswer ? View.GONE : View.VISIBLE);
+        mShowAnswerButton.setVisibility(mShowAnswer ? View.GONE : View.VISIBLE);
+        mAnswerTextView.setVisibility(mShowAnswer ? View.VISIBLE : View.GONE);
+
+        if (mShowAnswer) {
             String answer = getString(mAnswerIsTrue ? R.string.cheat_answer_true : R.string.cheat_answer_false);
             mAnswerTextView.setText(MessageFormat.format(getString(R.string.cheat_answer), answer));
         }
     }
 
     private void showAnswer() {
-        mHasCheated = true;
+        setAnswerShownResult(true);
+        mShowAnswer = true;
         updateUi();
     }
 }
