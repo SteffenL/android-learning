@@ -7,7 +7,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.text.MessageFormat;
 
@@ -17,11 +16,16 @@ public class MainActivity extends AppCompatActivity {
     private static final String KEY_ANSWERS_CORRECT = "answers_correct";
     private static final String KEY_ANSWERS_RECEIVED_STATES = "answers_received_states";
 
+    private View mInQuizLayout;
     private Button mTrueButton;
     private Button mFalseButton;
     private ImageButton mNextButton;
     private ImageButton mPreviousButton;
     private TextView mQuestionTextView;
+    private Button mCheatButton;
+
+    private View mPostQuizLayout;
+    private TextView mVerdictTextView;
     private Button mRestartButton;
 
     private Question[] mQuestionBank = new Question[] {
@@ -44,6 +48,10 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         Log.d(TAG, "onCreate(Bundle) called");
         setContentView(R.layout.activity_main);
+
+        // In-quiz layout
+
+        mInQuizLayout = findViewById(R.id.in_quiz_layout);
 
         mQuestionTextView = (TextView)findViewById(R.id.question_text_view);
         mQuestionTextView.setOnClickListener(new View.OnClickListener() {
@@ -85,6 +93,18 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        mCheatButton = (Button)findViewById(R.id.cheat_button);
+        mCheatButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                confirmCheat();
+            }
+        });
+
+        // Post-quiz layout
+
+        mPostQuizLayout = findViewById(R.id.post_quiz_layout);
+
         mRestartButton = (Button)findViewById(R.id.restart_button);
         mRestartButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -92,6 +112,8 @@ public class MainActivity extends AppCompatActivity {
                 restartQuiz();
             }
         });
+
+        mVerdictTextView = (TextView)findViewById(R.id.verdict_text_view);
 
         if (savedInstanceState != null) {
             mCurrentIndex = savedInstanceState.getInt(KEY_INDEX);
@@ -101,9 +123,7 @@ public class MainActivity extends AppCompatActivity {
             mTotalAnswered = numberOfAnswers(mAnswersReceivedStates);
         }
 
-        updateQuestion();
-        updateAnswerButtons();
-        updateRestartButton();
+        updateQuizUi();
     }
 
     @Override
@@ -145,19 +165,33 @@ public class MainActivity extends AppCompatActivity {
         outState.putBooleanArray(KEY_ANSWERS_CORRECT, mAnswersCorrect);
     }
 
-    private void updateQuestion() {
-        int question = mQuestionBank[mCurrentIndex].getTextResId();
-        mQuestionTextView.setText(question);
-    }
+    private void updateQuizUi() {
+        boolean allAnswered = allQuestionsAnswered();
+        if (!allAnswered) {
+            int question = mQuestionBank[mCurrentIndex].getTextResId();
+            mQuestionTextView.setText(question);
 
-    private void updateAnswerButtons() {
-        boolean haveReceivedAnswer = mAnswersReceivedStates[mCurrentIndex];
-        mTrueButton.setEnabled(!haveReceivedAnswer);
-        mFalseButton.setEnabled(!haveReceivedAnswer);
-    }
+            boolean haveReceivedAnswer = mAnswersReceivedStates[mCurrentIndex];
+            mTrueButton.setEnabled(!haveReceivedAnswer);
+            mFalseButton.setEnabled(!haveReceivedAnswer);
+            mCheatButton.setEnabled(!haveReceivedAnswer);
+        } else {
+            int correctAnswers = mCorrectAnswersCount;
+            int totalQuestions = mQuestionBank.length;
 
-    private void updateRestartButton() {
-        mRestartButton.setVisibility(allQuestionsAnswered() ? View.VISIBLE : View.INVISIBLE);
+            String message;
+            if (correctAnswers == totalQuestions) {
+                message = getString(R.string.result_all_correct);
+            } else {
+                double correctRatio = (double) correctAnswers / (double) totalQuestions;
+                message = MessageFormat.format(getString(R.string.result_partial_correct), correctAnswers, totalQuestions, correctRatio);
+            }
+
+            mVerdictTextView.setText(message);
+        }
+
+        mInQuizLayout.setVisibility(allAnswered ? View.GONE : View.VISIBLE);
+        mPostQuizLayout.setVisibility(allAnswered ? View.VISIBLE : View.GONE);
     }
 
     private void checkAnswer(boolean userPressedTrue) {
@@ -170,23 +204,7 @@ public class MainActivity extends AppCompatActivity {
             ++mCorrectAnswersCount;
         }
 
-        updateAnswerButtons();
-
-        if (allQuestionsAnswered()) {
-            int correctAnswers = mCorrectAnswersCount;
-            int totalQuestions = mQuestionBank.length;
-
-            String message;
-            if (correctAnswers == totalQuestions) {
-                message = getString(R.string.result_all_correct);
-            } else {
-                double correctRatio = (double)correctAnswers / (double)totalQuestions;
-                message = MessageFormat.format(getString(R.string.result_partial_correct), correctAnswers, totalQuestions, correctRatio);
-            }
-
-            updateRestartButton();
-            Toast.makeText(MainActivity.this, message, Toast.LENGTH_LONG).show();
-        }
+        updateQuizUi();
     }
 
     private boolean allQuestionsAnswered() {
@@ -217,14 +235,12 @@ public class MainActivity extends AppCompatActivity {
 
     private void nextQuestion() {
         mCurrentIndex = (mCurrentIndex + 1) % mQuestionBank.length;
-        updateQuestion();
-        updateAnswerButtons();
+        updateQuizUi();
     }
 
     private void previousQuestion() {
         mCurrentIndex = (mQuestionBank.length + mCurrentIndex - 1) % mQuestionBank.length;
-        updateQuestion();
-        updateAnswerButtons();
+        updateQuizUi();
     }
 
     private void restartQuiz() {
@@ -237,8 +253,10 @@ public class MainActivity extends AppCompatActivity {
         mTotalAnswered = 0;
         mCorrectAnswersCount = 0;
 
-        updateQuestion();
-        updateAnswerButtons();
-        mRestartButton.setVisibility(View.INVISIBLE);
+        updateQuizUi();
+    }
+
+    private void confirmCheat() {
+
     }
 }
