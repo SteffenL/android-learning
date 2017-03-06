@@ -16,4 +16,7 @@
     <string name="show_answer_button">Show answer</string>
     <string name="discourage_cheat_text">Taking shortcuts, are we?</string>
     <string name="cheat_button">Cheat!</string>
+    <string name="cheat_answer_true">True</string>
+    <string name="cheat_answer_false">False</string>
+    <string name="cheat_answer">Answer: {0}</string>
 </resources>

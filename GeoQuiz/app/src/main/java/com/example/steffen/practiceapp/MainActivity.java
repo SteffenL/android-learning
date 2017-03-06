@@ -1,5 +1,6 @@
 package com.example.steffen.practiceapp;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -40,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
     private int mCurrentIndex = 0;
     private boolean[] mAnswersReceivedStates = new boolean[mQuestionBank.length];
     private boolean[] mAnswersCorrect = new boolean[mQuestionBank.length];
+    private boolean[] mAnswersCheated = new boolean[mQuestionBank.length];
     private int mCorrectAnswersCount = 0;
     private int mTotalAnswered = 0;
 
@@ -257,6 +259,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void confirmCheat() {
-
+        boolean answerIsTrue = mQuestionBank[mCurrentIndex].isAnswerTrue();
+        boolean hasCheated = mAnswersCheated[mCurrentIndex];
+        
+        Intent intent = CheatActivity.newIntent(this, answerIsTrue, hasCheated);
+        startActivity(intent);
     }
 }
