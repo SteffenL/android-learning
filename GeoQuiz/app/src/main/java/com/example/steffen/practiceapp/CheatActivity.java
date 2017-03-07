@@ -45,6 +45,9 @@ public class CheatActivity extends AppCompatActivity {
         mAnswerIsTrue = getIntent().getBooleanExtra(EXTRA_ANSWER_IS_TRUE, false);
         mShowAnswer = getIntent().getBooleanExtra(EXTRA_ANSWER_SHOWN, false);
 
+        TextView buildVersionTextView = (TextView)findViewById(R.id.android_build_version);
+        buildVersionTextView.setText(MessageFormat.format(getString(R.string.android_build_version), Build.VERSION.SDK_INT));
+
         if (savedInstanceState != null) {
             mShowAnswer = savedInstanceState.getBoolean(KEY_SHOW_ANSWER, mShowAnswer);
             if (mShowAnswer) {

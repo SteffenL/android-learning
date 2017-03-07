@@ -21,4 +21,5 @@
     <string name="cheat_answer">Answer: {0}</string>
     <string name="result_all_correct_with_cheats">All answers are correct!\n\nHow about trying again without cheating?</string>
     <string name="result_partial_correct_with_cheats">{0} of {1} ({2,number,percent}) answers are correct!\n\nHow about trying again without cheating?</string>
+    <string name="android_build_version">API Level {0}</string>
 </resources>
