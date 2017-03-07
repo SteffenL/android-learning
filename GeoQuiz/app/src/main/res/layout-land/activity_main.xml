@@ -52,13 +52,30 @@
             android:contentDescription="@string/next_button"
             android:src="@drawable/arrow_right" />
 
-        <Button
-            android:id="@+id/cheat_button"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom|center_horizontal"
-            android:text="@string/cheat_button"
-            />
+            android:gravity="center_horizontal"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/cheat_tokens_text_view"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="TextView"
+                android:textAlignment="center"
+                tools:text="Remaining cheat tokens"/>
+
+            <Button
+                android:id="@+id/cheat_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/cheat_button"/>
+        </LinearLayout>
+
     </FrameLayout>
 
     <FrameLayout android:id="@+id/post_quiz_layout"

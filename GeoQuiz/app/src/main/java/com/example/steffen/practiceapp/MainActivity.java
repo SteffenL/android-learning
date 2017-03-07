@@ -17,7 +17,9 @@ public class MainActivity extends AppCompatActivity {
     private static final String KEY_ANSWERS_CORRECT = "answers_correct";
     private static final String KEY_ANSWERS_RECEIVED_STATES = "answers_received_states";
     private static final String KEY_ANSWERS_SHOWN = "answers_shown";
+    private static final String KEY_CHEAT_TOKENS = "cheat_tokens";
     private static final int REQUEST_CODE_CHEAT = 0;
+    private static final int INITIAL_CHEAT_TOKENS = 3;
 
     private View mInQuizLayout;
     private Button mTrueButton;
@@ -26,6 +28,7 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton mPreviousButton;
     private TextView mQuestionTextView;
     private Button mCheatButton;
+    private TextView mCheatTokensTextView;
 
     private View mPostQuizLayout;
     private TextView mVerdictTextView;
@@ -47,6 +50,7 @@ public class MainActivity extends AppCompatActivity {
     private int mCorrectAnswersCount = 0;
     private int mTotalAnswered = 0;
     private boolean mIsCheater = false;
+    private int mCheatTokens = INITIAL_CHEAT_TOKENS;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -106,6 +110,8 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        mCheatTokensTextView = (TextView)findViewById(R.id.cheat_tokens_text_view);
+
         // Post-quiz layout
 
         mPostQuizLayout = findViewById(R.id.post_quiz_layout);
@@ -125,6 +131,7 @@ public class MainActivity extends AppCompatActivity {
             mAnswersReceivedStates = savedInstanceState.getBooleanArray(KEY_ANSWERS_RECEIVED_STATES);
             mAnswersCorrect = savedInstanceState.getBooleanArray(KEY_ANSWERS_CORRECT);
             mAnswersShown = savedInstanceState.getBooleanArray(KEY_ANSWERS_SHOWN);
+            mCheatTokens = savedInstanceState.getInt(KEY_CHEAT_TOKENS);
 
             mCorrectAnswersCount = numberOfCorrectAnswers(mAnswersReceivedStates, mAnswersCorrect);
             mTotalAnswered = numberOfAnswers(mAnswersReceivedStates);
@@ -172,6 +179,7 @@ public class MainActivity extends AppCompatActivity {
         outState.putBooleanArray(KEY_ANSWERS_RECEIVED_STATES, mAnswersReceivedStates);
         outState.putBooleanArray(KEY_ANSWERS_CORRECT, mAnswersCorrect);
         outState.putBooleanArray(KEY_ANSWERS_SHOWN, mAnswersShown);
+        outState.putInt(KEY_CHEAT_TOKENS, mCheatTokens);
     }
 
     @Override
@@ -200,6 +208,7 @@ public class MainActivity extends AppCompatActivity {
         if (answerShown) {
             mAnswersShown[mCurrentIndex] = true;
             mIsCheater = true;
+            --mCheatTokens;
         }
     }
 
@@ -212,7 +221,8 @@ public class MainActivity extends AppCompatActivity {
             boolean haveReceivedAnswer = mAnswersReceivedStates[mCurrentIndex];
             mTrueButton.setEnabled(!haveReceivedAnswer);
             mFalseButton.setEnabled(!haveReceivedAnswer);
-            mCheatButton.setEnabled(!haveReceivedAnswer);
+            mCheatButton.setEnabled(!haveReceivedAnswer && (mAnswersShown[mCurrentIndex] || haveCheatTokens()));
+            mCheatTokensTextView.setText(MessageFormat.format(getString(R.string.cheat_tokens), mCheatTokens));
         } else {
             int correctAnswers = mCorrectAnswersCount;
             int totalQuestions = mQuestionBank.length;
@@ -285,6 +295,10 @@ public class MainActivity extends AppCompatActivity {
         return result;
     }
 
+    private boolean haveCheatTokens() {
+        return mCheatTokens > 0;
+    }
+
     private void nextQuestion() {
         mCurrentIndex = (mCurrentIndex + 1) % mQuestionBank.length;
         updateQuizUi();
@@ -306,6 +320,7 @@ public class MainActivity extends AppCompatActivity {
         mTotalAnswered = 0;
         mCorrectAnswersCount = 0;
         mIsCheater = false;
+        mCheatTokens = INITIAL_CHEAT_TOKENS;
 
         updateQuizUi();
     }
