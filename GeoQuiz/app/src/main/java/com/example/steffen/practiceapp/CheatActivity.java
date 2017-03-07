@@ -1,11 +1,16 @@
 package com.example.steffen.practiceapp;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.content.Intent;
 import android.icu.text.MessageFormat;
+import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
+import android.view.ViewAnimationUtils;
+import android.view.animation.Animation;
 import android.widget.Button;
 import android.widget.TextView;
 
@@ -47,7 +52,7 @@ public class CheatActivity extends AppCompatActivity {
             }
         }
 
-        updateUi();
+        updateUi(true);
     }
 
     @Override
@@ -73,20 +78,54 @@ public class CheatActivity extends AppCompatActivity {
         setResult(RESULT_OK, data);
     }
 
-    private void updateUi() {
-        mDiscourageCheatTextView.setVisibility(mShowAnswer ? View.GONE : View.VISIBLE);
-        mShowAnswerButton.setVisibility(mShowAnswer ? View.GONE : View.VISIBLE);
-        mAnswerTextView.setVisibility(mShowAnswer ? View.VISIBLE : View.GONE);
-
+    private void updateUi(boolean initial) {
         if (mShowAnswer) {
             String answer = getString(mAnswerIsTrue ? R.string.cheat_answer_true : R.string.cheat_answer_false);
             mAnswerTextView.setText(MessageFormat.format(getString(R.string.cheat_answer), answer));
+        }
+
+        if (initial) {
+            mDiscourageCheatTextView.setVisibility(mShowAnswer ? View.GONE : View.VISIBLE);
+            mShowAnswerButton.setVisibility(mShowAnswer ? View.GONE : View.VISIBLE);
+            mAnswerTextView.setVisibility(mShowAnswer ? View.VISIBLE : View.GONE);
+            return;
+        }
+
+        if (mShowAnswer) {
+            if (mDiscourageCheatTextView.getVisibility() == View.VISIBLE) {
+                mDiscourageCheatTextView.setVisibility(View.GONE);
+            }
+
+            mAnswerTextView.setVisibility(View.VISIBLE);
+
+            if (mShowAnswerButton.getVisibility() == View.VISIBLE) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    int cx = mShowAnswerButton.getWidth() / 2;
+                    int cy = mShowAnswerButton.getHeight() / 2;
+                    float radius = mShowAnswerButton.getWidth() / 2;
+                    Animator anim = ViewAnimationUtils.createCircularReveal(mShowAnswerButton, cx, cy, radius, 0);
+                    anim.addListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            super.onAnimationEnd(animation);
+                            mShowAnswerButton.setVisibility(View.GONE);
+                        }
+                    });
+                    anim.start();
+                } else {
+                    mShowAnswerButton.setVisibility(View.GONE);
+                }
+            }
+        } else {
+            mDiscourageCheatTextView.setVisibility(View.VISIBLE);
+            mShowAnswerButton.setVisibility(View.VISIBLE);
+            mAnswerTextView.setVisibility(View.GONE);
         }
     }
 
     private void showAnswer() {
         setAnswerShownResult(true);
         mShowAnswer = true;
-        updateUi();
+        updateUi(false);
     }
 }
