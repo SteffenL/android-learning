@@ -8,6 +8,7 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,12 +30,15 @@ public class CrimeListFragment extends Fragment {
 
         private TextView mCrimeTitleTextView;
         private TextView mCrimeDateTextView;
+        private ImageView mCrimeSolvedImageView;
 
         public CrimeHolder(LayoutInflater inflater, ViewGroup parent, int layout) {
             super(inflater.inflate(layout, parent, false));
 
             mCrimeTitleTextView = (TextView)itemView.findViewById(R.id.crime_title);
             mCrimeDateTextView = (TextView)itemView.findViewById(R.id.crime_date);
+            mCrimeSolvedImageView = (ImageView)itemView.findViewById(R.id.crime_solved);
+
             itemView.setOnClickListener(this);
         }
 
@@ -42,6 +46,7 @@ public class CrimeListFragment extends Fragment {
             mCrime = crime;
             mCrimeTitleTextView.setText(mCrime.getTitle());
             mCrimeDateTextView.setText(mCrime.getDate().toString());
+            mCrimeSolvedImageView.setVisibility(mCrime.isSolved() ? View.VISIBLE : View.GONE);
         }
     }
 
@@ -68,7 +73,7 @@ public class CrimeListFragment extends Fragment {
         @Override
         public int getItemViewType(int position) {
             Crime crime = mCrimes.get(position);
-            return crime.isRequiresPolice() ? R.layout.list_item_crime_police : R.layout.list_item_crime;
+            return (!crime.isSolved() && crime.isRequiresPolice()) ? R.layout.list_item_crime_police : R.layout.list_item_crime;
         }
 
         public CrimeAdapter(List<Crime> crimes) {
