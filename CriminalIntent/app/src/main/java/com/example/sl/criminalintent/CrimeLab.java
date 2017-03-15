@@ -10,12 +10,12 @@ import java.util.UUID;
  * Created by Steffen on 2017-03-08.
  */
 
-public class CrimeLab {
+class CrimeLab {
     private static CrimeLab sCrimeLab;
 
     private List<Crime> mCrimes;
 
-    public static CrimeLab get(Context context) {
+    static CrimeLab get(Context context) {
         if (sCrimeLab == null) {
             sCrimeLab = new CrimeLab(context);
         }
@@ -23,7 +23,7 @@ public class CrimeLab {
         return sCrimeLab;
     }
 
-    private CrimeLab(Context context) {
+    CrimeLab(Context context) {
         mCrimes = new ArrayList<>();
 
         for (int i = 0; i < 100; ++i) {
@@ -35,11 +35,11 @@ public class CrimeLab {
         }
     }
 
-    public List<Crime> getCrimes() {
+    List<Crime> getCrimes() {
         return mCrimes;
     }
 
-    public Crime getCrime(UUID id) {
+    Crime getCrime(UUID id) {
         for (Crime crime : mCrimes) {
             if (crime.getId().equals(id)) {
                 return crime;

@@ -25,8 +25,6 @@ public class CrimeFragment extends Fragment {
     private Crime mCrime;
 
     private EditText mTitleField;
-    private Button mDateButton;
-    private CheckBox mSolvedCheckBox;
 
     static CrimeFragment newInstance(UUID crimeID) {
         Bundle args = new Bundle();
@@ -60,13 +58,13 @@ public class CrimeFragment extends Fragment {
             }
         });
 
-        mDateButton = (Button)v.findViewById(R.id.crime_date);
-        mDateButton.setText(mCrime.getDate().toString());
-        mDateButton.setEnabled(false);
+        Button dateButton = (Button) v.findViewById(R.id.crime_date);
+        dateButton.setText(mCrime.getDate().toString());
+        dateButton.setEnabled(false);
 
-        mSolvedCheckBox = (CheckBox)v.findViewById(R.id.crime_solved);
-        mSolvedCheckBox.setChecked(mCrime.isSolved());
-        mSolvedCheckBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
+        CheckBox solvedCheckBox = (CheckBox) v.findViewById(R.id.crime_solved);
+        solvedCheckBox.setChecked(mCrime.isSolved());
+        solvedCheckBox.setOnCheckedChangeListener(new OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 mCrime.setSolved(isChecked);

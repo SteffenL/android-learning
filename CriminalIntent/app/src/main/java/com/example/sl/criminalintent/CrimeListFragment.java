@@ -13,7 +13,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.List;
 
@@ -29,7 +28,7 @@ public class CrimeListFragment extends Fragment {
         private TextView mCrimeDateTextView;
         private ImageView mCrimeSolvedImageView;
 
-        public CrimeHolder(LayoutInflater inflater, ViewGroup parent, int layout) {
+        CrimeHolder(LayoutInflater inflater, ViewGroup parent, int layout) {
             super(inflater.inflate(layout, parent, false));
 
             mCrimeTitleTextView = (TextView)itemView.findViewById(R.id.crime_title);
@@ -39,7 +38,7 @@ public class CrimeListFragment extends Fragment {
             itemView.setOnClickListener(this);
         }
 
-        public void bind(Crime crime) {
+        void bind(Crime crime) {
             mCrime = crime;
             mCrimeTitleTextView.setText(mCrime.getTitle());
             mCrimeDateTextView.setText(DateFormat.format(getString(R.string.crime_date_format), mCrime.getDate()));
@@ -81,7 +80,7 @@ public class CrimeListFragment extends Fragment {
             return (!crime.isSolved() && crime.isRequiresPolice()) ? R.layout.list_item_crime_police : R.layout.list_item_crime;
         }
 
-        public CrimeAdapter(List<Crime> crimes) {
+        CrimeAdapter(List<Crime> crimes) {
             mCrimes = crimes;
         }
     }
