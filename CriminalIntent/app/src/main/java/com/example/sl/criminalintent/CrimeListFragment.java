@@ -1,11 +1,13 @@
 package com.example.sl.criminalintent;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateFormat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -22,12 +24,6 @@ import java.util.List;
 public class CrimeListFragment extends Fragment {
     private class CrimeHolder extends RecyclerView.ViewHolder implements RecyclerView.OnClickListener {
         private Crime mCrime;
-
-        @Override
-        public void onClick(View v) {
-            String msg = mCrime.getTitle() + " clicked";
-            Toast.makeText(getActivity(), msg, Toast.LENGTH_SHORT).show();
-        }
 
         private TextView mCrimeTitleTextView;
         private TextView mCrimeDateTextView;
@@ -49,9 +45,16 @@ public class CrimeListFragment extends Fragment {
             mCrimeDateTextView.setText(DateFormat.format(getString(R.string.crime_date_format), mCrime.getDate()));
             mCrimeSolvedImageView.setVisibility(mCrime.isSolved() ? View.VISIBLE : View.GONE);
         }
+
+        @Override
+        public void onClick(View v) {
+            Intent intent = CrimeActivity.newIntent(getActivity(), mCrime.getId());
+            startActivity(intent);
+        }
     }
 
     private class CrimeAdapter extends RecyclerView.Adapter<CrimeHolder> {
+        private static final String TAG = "CrimeAdapter";
         private List<Crime> mCrimes;
 
         @Override
@@ -63,6 +66,7 @@ public class CrimeListFragment extends Fragment {
         @Override
         public void onBindViewHolder(CrimeHolder holder, int position) {
             Crime crime = mCrimes.get(position);
+            Log.d(TAG, String.format("onBindViewHolder: position = %d; crime title = %s", position, crime.getTitle()));
             holder.bind(crime);
         }
 
@@ -82,6 +86,8 @@ public class CrimeListFragment extends Fragment {
         }
     }
 
+    private static final String TAG = "CrimeListFragment";
+
     private RecyclerView mCrimeRecyclerView;
     private CrimeAdapter mAdapter;
 
@@ -93,16 +99,26 @@ public class CrimeListFragment extends Fragment {
         mCrimeRecyclerView = (RecyclerView)view.findViewById(R.id.crime_recycler_view);
         mCrimeRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
 
-        updateUI();
-
         return view;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        updateUI();
     }
 
     private void updateUI() {
         CrimeLab crimeLab = CrimeLab.get(getActivity());
         List<Crime> crimes = crimeLab.getCrimes();
 
-        mAdapter = new CrimeAdapter(crimes);
-        mCrimeRecyclerView.setAdapter(mAdapter);
+        if (mAdapter == null) {
+            Log.d(TAG, "Creating new adapter");
+            mAdapter = new CrimeAdapter(crimes);
+            mCrimeRecyclerView.setAdapter(mAdapter);
+        } else {
+            Log.d(TAG, "Notifying data set changed");
+            mAdapter.notifyDataSetChanged();
+        }
     }
 }
